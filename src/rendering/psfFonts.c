@@ -21,8 +21,13 @@ void drawChar(int x, int y, char c, uint32_t color, const void* font_data, struc
 
 void drawString(int x, int y, const char* string, uint32_t color, const void* font_data, struct limine_framebuffer *framebuffer) {
     while (*string != '\0') {
-        drawChar(x, y, *string, color, font_data, framebuffer);
-        x += 16;
+        if (*string == '\n') {
+            y += 32;
+            x = 0;
+        } else {
+            drawChar(x, y, *string, color, font_data, framebuffer);
+            x += 16;
+        }
         string++;
     }
 }

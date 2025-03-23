@@ -4,3 +4,4 @@
 #include "../boot/limine.h"
 
 void drawPixel(uint64_t posX, uint64_t posY, struct limine_framebuffer *framebuffer, uint32_t color);
+void clearFramebuffer(struct limine_framebuffer *framebuffer);

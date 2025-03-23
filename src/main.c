@@ -5,8 +5,9 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "boot/limine.h"
-// #include "rendering/fbPixRenderer.h"
+#include "cfuncs/cfuncs.h"
 #include "rendering/psfFonts.h"
+#include "console/basicConsole.h"
 
 // limine requests
 __attribute__((used, section(".limine_requests")))
@@ -28,63 +29,6 @@ static volatile LIMINE_REQUESTS_START_MARKER;
 
 __attribute__((used, section(".limine_requests_end")))
 static volatile LIMINE_REQUESTS_END_MARKER;
-
-// GCC and Clang reserve the right to generate calls to the following
-// 4 functions even if they are not directly called.l
-// Implement them as the C specification mandates.
-// DO NOT remove or rename these functions, or stuff will eventually break!
-//  - osdev wiki
-
-inline void *memcpy(void *dest, const void *src, size_t n) {
-    uint8_t *pdest = (uint8_t *)dest;
-    const uint8_t *psrc = (const uint8_t *)src;
-
-    for (size_t i = 0; i < n; i++) {
-        pdest[i] = psrc[i];
-    }
-
-    return dest;
-}
-
-inline void *memset(void *s, int c, size_t n) {
-    uint8_t *p = (uint8_t *)s;
-
-    for (size_t i = 0; i < n; i++) {
-        p[i] = (uint8_t)c;
-    }
-
-    return s;
-}
-
-inline void *memmove(void *dest, const void *src, size_t n) {
-    uint8_t *pdest = (uint8_t *)dest;
-    const uint8_t *psrc = (const uint8_t *)src;
-
-    if (src > dest) {
-        for (size_t i = 0; i < n; i++) {
-            pdest[i] = psrc[i];
-        }
-    } else if (src < dest) {
-        for (size_t i = n; i > 0; i--) {
-            pdest[i-1] = psrc[i-1];
-        }
-    }
-
-    return dest;
-}
-
-inline int memcmp(const void *s1, const void *s2, size_t n) {
-    const uint8_t *p1 = (const uint8_t *)s1;
-    const uint8_t *p2 = (const uint8_t *)s2;
-
-    for (size_t i = 0; i < n; i++) {
-        if (p1[i] != p2[i]) {
-            return p1[i] < p2[i] ? -1 : 1;
-        }
-    }
-
-    return 0;
-}
 
 // halt and catch fire
 static void hcf(void) {
@@ -130,13 +74,19 @@ void kernMain(void) {
 
     const void* font_data = &_binary_assets_fonts_zap_ext_light32_psf_start;
 
-    const char* fbWidthStr = itoa(framebuffer->width, 10);
-    const char* fbHeightStr = itoa(framebuffer->height, 10);
+    /* const char* fb_width_str = itoa(framebuffer->width, 10);
+    const char* fb_height_str = itoa(framebuffer->height, 10); */
 
-    drawString(0, 0, "simplexModus v0", 0x00FF00, font_data, framebuffer);
-    drawString(0, 32, "framebuffer resolution: ", 0xFFFFFF, font_data, framebuffer);
-    drawString(384, 32, fbWidthStr, 0xFFFFFF, font_data, framebuffer);
-    drawString(464, 32, fbHeightStr, 0xFFFFFF, font_data, framebuffer);
+    BASIC_CONSOLE kconsole;
+    BASIC_CONSOLE* kconsole_ptr = &kconsole;
+    bcon_init(kconsole_ptr, framebuffer, font_data);
+
+    /* drawString(0, 0, "simplexModus\nv0", 0x00FF00, font_data, framebuffer);
+    drawString(0, 64, "framebuffer resolution: ", 0xFFFFFF, font_data, framebuffer);
+    drawString(384, 64, fb_width_str, 0xFFFFFF, font_data, framebuffer);
+    drawString(464, 64, fb_height_str, 0xFFFFFF, font_data, framebuffer); */
+
+    bcon_write(kconsole_ptr, "simplexModus v0", true);
 
     // done, hang
     hcf();
