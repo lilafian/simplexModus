@@ -74,19 +74,18 @@ void kernMain(void) {
 
     const void* font_data = &_binary_assets_fonts_zap_ext_light32_psf_start;
 
-    /* const char* fb_width_str = itoa(framebuffer->width, 10);
-    const char* fb_height_str = itoa(framebuffer->height, 10); */
+    const char* fb_width_str = itoa(framebuffer->width, 10);
+    const char* fb_height_str = itoa(framebuffer->height, 10);
 
     BASIC_CONSOLE kconsole;
     BASIC_CONSOLE* kconsole_ptr = &kconsole;
     bcon_init(kconsole_ptr, framebuffer, font_data);
 
-    /* drawString(0, 0, "simplexModus\nv0", 0x00FF00, font_data, framebuffer);
-    drawString(0, 64, "framebuffer resolution: ", 0xFFFFFF, font_data, framebuffer);
-    drawString(384, 64, fb_width_str, 0xFFFFFF, font_data, framebuffer);
-    drawString(464, 64, fb_height_str, 0xFFFFFF, font_data, framebuffer); */
-
-    bcon_write(kconsole_ptr, "simplexModus v0", true);
+    bcon_write(kconsole_ptr, "simplexModus v0\n", true);
+    bcon_append(kconsole_ptr, "framebuffer dimensions: ", true);
+    bcon_append(kconsole_ptr, fb_width_str, true);
+    bcon_append(kconsole_ptr, "x", true);
+    bcon_append(kconsole_ptr, fb_height_str, true);
 
     // done, hang
     hcf();

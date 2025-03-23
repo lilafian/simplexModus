@@ -1,4 +1,4 @@
-// Basic console (tty-like) struct/methods
+// Basic console (tty-like) implementation
 
 #include "basicConsole.h"
 #include "../cfuncs/cfuncs.h"
@@ -15,8 +15,18 @@ void bcon_write(BASIC_CONSOLE* console, const char* text, bool update_display) {
 }
 
 
-void bcon_append(BASIC_CONSOLE* console, const char* text, bool update_display);
-void bcon_clear(BASIC_CONSOLE* console, const char* text, bool update_display);
+void bcon_append(BASIC_CONSOLE* console, const char* text, bool update_display) {
+    if (smk_strlen(text) + smk_strlen(console->out_content) > 1023) { // 1024 minus null terminator
+        return;
+    }
+
+    smk_concat(console->out_content, text);
+
+    if (update_display) {
+        bcon_display(console);
+    }
+}
+
 void bcon_display(BASIC_CONSOLE* console) {
     if (console == NULL || console->framebuffer == NULL) {
         return;
