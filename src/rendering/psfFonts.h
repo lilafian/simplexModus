@@ -1,6 +1,7 @@
 #pragma once
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "fbPixRenderer.h"
 #include "../boot/limine.h"
 
@@ -18,4 +19,4 @@ typedef struct __attribute__((packed)) {
 } PSF2_header;
 
 void drawChar(int x, int y, char c, uint32_t color, const void* font_data, struct limine_framebuffer *framebuffer);
-void drawString(int x, int y, const char* string, uint32_t color, const void* font_data, struct limine_framebuffer *framebuffer);
+void drawString(int x, int y, const char* string, uint32_t color, const void* font_data, struct limine_framebuffer *framebuffer, bool no_color);

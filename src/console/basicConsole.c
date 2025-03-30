@@ -33,7 +33,7 @@ void bcon_display(BASIC_CONSOLE* console) {
     }
     struct limine_framebuffer* fb = console->framebuffer;
     clearFramebuffer(fb);
-    drawString(0, 0, console->out_content, 0xffffffff, console->display_font, fb);
+    drawString(0, 0, console->out_content, 0xffffffff, console->display_font, fb, false);
 }
 
 void bcon_init(BASIC_CONSOLE* console, struct limine_framebuffer* framebuffer, void* display_font) {

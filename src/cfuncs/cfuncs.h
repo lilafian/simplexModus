@@ -1,5 +1,7 @@
 #pragma once
 #include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 // GCC and Clang reserve the right to generate calls to the following
 // 4 functions even if they are not directly called.l
@@ -7,75 +9,15 @@
 // DO NOT remove or rename these functions, or stuff will eventually break!
 //  - osdev wiki
 
-inline void *memcpy(void *dest, const void *src, size_t n) {
-    uint8_t *pdest = (uint8_t *)dest;
-    const uint8_t *psrc = (const uint8_t *)src;
+void *memcpy(void *dest, const void *src, size_t n);
+void *memset(void *s, int c, size_t n);
+void *memmove(void *dest, const void *src, size_t n);
+int memcmp(const void *s1, const void *s2, size_t n);
 
-    for (size_t i = 0; i < n; i++) {
-        pdest[i] = psrc[i];
-    }
+char* itoa(int val, int base);
 
-    return dest;
-}
+// custom implementations of normal stdlib funcs will be prepended with "smk_"
 
-inline void *memset(void *s, int c, size_t n) {
-    uint8_t *p = (uint8_t *)s;
-
-    for (size_t i = 0; i < n; i++) {
-        p[i] = (uint8_t)c;
-    }
-
-    return s;
-}
-
-inline void *memmove(void *dest, const void *src, size_t n) {
-    uint8_t *pdest = (uint8_t *)dest;
-    const uint8_t *psrc = (const uint8_t *)src;
-
-    if (src > dest) {
-        for (size_t i = 0; i < n; i++) {
-            pdest[i] = psrc[i];
-        }
-    } else if (src < dest) {
-        for (size_t i = n; i > 0; i--) {
-            pdest[i-1] = psrc[i-1];
-        }
-    }
-
-    return dest;
-}
-
-inline int memcmp(const void *s1, const void *s2, size_t n) {
-    const uint8_t *p1 = (const uint8_t *)s1;
-    const uint8_t *p2 = (const uint8_t *)s2;
-
-    for (size_t i = 0; i < n; i++) {
-        if (p1[i] != p2[i]) {
-            return p1[i] < p2[i] ? -1 : 1;
-        }
-    }
-
-    return 0;
-}
-
-inline int smk_strlen(const char* text) {
-    int length = 0;
-    while (text[length] != '\0') {
-        length++;
-    }
-    return length;
-}
-
-inline void smk_concat(char* dest, const char* src) {
-    while (*dest != '\0') {
-        dest++;
-    }
-
-    while (*src != '\0') {
-        *dest = *src;
-        dest++;
-        src++;
-    }
-
-    *dest = '\0';
-}
+int smk_strlen(const char* text);
+void smk_concat(char* dest, const char* src);
+bool smk_isdigit(char character);

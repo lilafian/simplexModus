@@ -41,21 +41,6 @@ extern char _binary_assets_fonts_zap_ext_light32_psf_start;
 extern char _binary_assets_fonts_zap_ext_light32_psf_end;
 extern char _binary_assets_fonts_zap_ext_light32_psf_size;
 
-// TEMPORARY FUNCTION FOR INTEGER CONVERSION!!! PLEASE MAKE A BETTER ONE AT SOME POINT!!!
-
-char* itoa(int val, int base){
-
-    static char buf[32] = {0};
-
-    int i = 30;
-
-    for(; val && i ; --i, val /= base)
-
-        buf[i] = "0123456789abcdef"[val % base];
-
-    return &buf[i+1];
-
-}
 
 // ! KERNEL ENTRY POINT !
 void kernMain(void) {
@@ -81,7 +66,7 @@ void kernMain(void) {
     BASIC_CONSOLE* kconsole_ptr = &kconsole;
     bcon_init(kconsole_ptr, framebuffer, font_data);
 
-    bcon_write(kconsole_ptr, "simplexModus v0\n", true);
+    bcon_write(kconsole_ptr, "\033[32msimplexModus v0\033[97m\n", true);
     bcon_append(kconsole_ptr, "framebuffer dimensions: ", true);
     bcon_append(kconsole_ptr, fb_width_str, true);
     bcon_append(kconsole_ptr, "x", true);

@@ -1,4 +1,6 @@
 #include "psfFonts.h"
+#include "../cfuncs/cfuncs.h"
+#include "colors/colors.h"
 
 void drawChar(int x, int y, char c, uint32_t color, const void* font_data, struct limine_framebuffer *framebuffer) {
     const PSF2_header* header = (const PSF2_header*)font_data;
@@ -19,14 +21,28 @@ void drawChar(int x, int y, char c, uint32_t color, const void* font_data, struc
     }
 }
 
-void drawString(int x, int y, const char* string, uint32_t color, const void* font_data, struct limine_framebuffer *framebuffer) {
+void drawString(int x, int y, const char* string, uint32_t color, const void* font_data, struct limine_framebuffer *framebuffer, bool no_color) {
+    uint32_t drawn_color = color; // use drawn_color to account for ansi codes
+
     while (*string != '\0') {
         if (*string == '\n') {
             y += 32;
             x = 0;
         } else {
-            drawChar(x, y, *string, color, font_data, framebuffer);
-            x += 16;
+            if (!no_color && *string == '\033' && *(string + 1) == '[') { // is ansi color code escape sequence
+                string += 2; // now at character after [
+
+                uint16_t ansi_buffer = 0;
+                while (smk_isdigit(*string)) {
+                    // this is probably insecure but who cares right?
+                    ansi_buffer = (ansi_buffer * 10) + (*string - '0');
+                    string++;
+                }
+                drawn_color = getHexFromANSI(ansi_buffer);
+            } else {
+                drawChar(x, y, *string, drawn_color, font_data, framebuffer);
+                x += 16;
+            }
         }
         string++;
     }
