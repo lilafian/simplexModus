@@ -7,7 +7,7 @@
 #include "../boot/limine.h"
 
 typedef struct {
-    char out_content[1024];
+    char out_content[4096];
     uint16_t width;
     uint16_t height;
     uint32_t color;

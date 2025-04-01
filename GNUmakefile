@@ -14,6 +14,7 @@ NASMFLAGS := -F dwarf -g
 LDFLAGS :=
 
 FONT_FILE := assets/fonts/zap-ext-light32.psf
+STARTUP_FILE := startup.nsh
 
 override CC_IS_CLANG := $(shell ! $(CC) -- version 2>/dev/null | grep 'clang' >/dev/null 2>&1; echo $$?)
 
@@ -133,4 +134,30 @@ build:
 
 .PHONY: run
 run:
-	qemu-system-x86_64 -boot d -cdrom simplexModus.iso -m 512
+	@echo "!=============================================================!"
+	@echo "If your password is prompted, it is for booting OVMF with sudo!"
+	@echo "!=============================================================!"
+	sudo qemu-system-x86_64 \
+		-machine pc \
+		-enable-kvm \
+		-drive file=simplexModus.iso,media=cdrom,if=none,id=spxmds \
+		-m 256M \
+		-drive if=pflash,format=raw,readonly=on,file=/usr/share/ovmf/x64/OVMF_CODE.4m.fd \
+		-drive if=pflash,format=raw,file=/usr/share/ovmf/x64/OVMF_VARS.4m.fd \
+		-device ide-cd,drive=spxmds,bootindex=0
+
+.PHONY: rundbg
+rundbg:
+	@echo "!=============================================================!"
+	@echo "If your password is prompted, it is for booting OVMF with sudo!"
+	@echo "!=============================================================!"
+	sudo qemu-system-x86_64 \
+		-s -S \
+		-machine pc \
+		-enable-kvm \
+		-drive file=simplexModus.iso,media=cdrom,if=none,id=spxmds \
+		-m 256M \
+		-drive if=pflash,format=raw,readonly=on,file=/usr/share/ovmf/x64/OVMF_CODE.4m.fd \
+		-drive if=pflash,format=raw,file=/usr/share/ovmf/x64/OVMF_VARS.4m.fd \
+		-device ide-cd,drive=spxmds,bootindex=0
+

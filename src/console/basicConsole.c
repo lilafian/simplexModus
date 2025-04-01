@@ -28,13 +28,28 @@ void bcon_append(BASIC_CONSOLE* console, const char* text, bool update_display) 
 }
 
 void bcon_display(BASIC_CONSOLE* console) {
-    if (console == NULL || console->framebuffer == NULL) {
-        return;
+    if (!console || !console->framebuffer) return;
+    
+    clearFramebuffer(console->framebuffer);
+
+    int total_lines = smk_occurrences(console->out_content, '\n') + 1;
+    
+    const char *start = console->out_content;
+    if (total_lines > console->height) {
+        int lines_to_skip = total_lines - console->height;
+        while (lines_to_skip > 0 && *start) {
+            if (*start++ == '\n') {
+                lines_to_skip--;
+            }
+        }
     }
-    struct limine_framebuffer* fb = console->framebuffer;
-    clearFramebuffer(fb);
-    drawString(0, 0, console->out_content, 0xffffffff, console->display_font, fb, false);
+
+    drawString(0, 32, start, 0xffffffff, console->display_font, console->framebuffer, false);
+
+    drawRect(0, 0, console->framebuffer->width, 32, console->framebuffer, 0xbbbbbb);
+    drawString(0, 0, "simplexModus v0", 0x000000, console->display_font, console->framebuffer, false);
 }
+
 
 void bcon_init(BASIC_CONSOLE* console, struct limine_framebuffer* framebuffer, void* display_font) {
     console->framebuffer = framebuffer;
@@ -42,6 +57,6 @@ void bcon_init(BASIC_CONSOLE* console, struct limine_framebuffer* framebuffer, v
     console->cursorX = 0;
     console->cursorY = 0;
     console->width = framebuffer->width / 16;
-    console->height = framebuffer->height / 32;
+    console->height = framebuffer->height / 32 - 1;
     console->out_content[0] = '\0';
 }
