@@ -26,7 +26,7 @@ void drawString(int x, int y, const char* string, uint32_t color, const void* fo
 
     while (*string != '\0') {
         if (*string == '\n') {
-            y += 32;
+            y += 16;
             x = 0;
         } else {
             if (!no_color && *string == '\033' && *(string + 1) == '[') { // is ansi color code escape sequence
@@ -41,7 +41,7 @@ void drawString(int x, int y, const char* string, uint32_t color, const void* fo
                 drawn_color = getHexFromANSI(ansi_buffer);
             } else {
                 drawChar(x, y, *string, drawn_color, font_data, framebuffer);
-                x += 16;
+                x += 8;
             }
         }
         string++;

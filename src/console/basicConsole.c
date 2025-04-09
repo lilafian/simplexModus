@@ -44,9 +44,9 @@ void bcon_display(BASIC_CONSOLE* console) {
         }
     }
 
-    drawString(0, 32, start, 0xffffffff, console->display_font, console->framebuffer, false);
+    drawString(0, 16, start, 0xffffffff, console->display_font, console->framebuffer, false);
 
-    drawRect(0, 0, console->framebuffer->width, 32, console->framebuffer, 0xbbbbbb);
+    drawRect(0, 0, console->framebuffer->width, 16, console->framebuffer, 0xbbbbbb);
     drawString(0, 0, "simplexModus v0", 0x000000, console->display_font, console->framebuffer, false);
 }
 
@@ -57,6 +57,6 @@ void bcon_init(BASIC_CONSOLE* console, struct limine_framebuffer* framebuffer, v
     console->cursorX = 0;
     console->cursorY = 0;
     console->width = framebuffer->width / 16;
-    console->height = framebuffer->height / 32 - 1;
+    console->height = framebuffer->height / 16 - 1;
     console->out_content[0] = '\0';
 }

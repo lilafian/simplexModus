@@ -55,9 +55,9 @@ static void hcf(void) {
     }
 }
 
-extern char _binary_assets_fonts_zap_ext_light32_psf_start;
-extern char _binary_assets_fonts_zap_ext_light32_psf_end;
-extern char _binary_assets_fonts_zap_ext_light32_psf_size;
+extern uint8_t _binary_assets_fonts_zap_ext_vga16_psf_start[];
+extern uint8_t _binary_assets_fonts_zap_ext_vga16_psf_end[];
+extern uint8_t _binary_assets_fonts_zap_ext_vga16_psf_size;
 
 // ! KERNEL ENTRY POINT !
 void kernMain(void) {
@@ -74,7 +74,7 @@ void kernMain(void) {
     // fetch framebuffer
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
-    void* font_data = &_binary_assets_fonts_zap_ext_light32_psf_start;
+    void* font_data = &_binary_assets_fonts_zap_ext_vga16_psf_start;
     const char* fb_width_str = itoa(framebuffer->width, 10);
     const char* fb_height_str = itoa(framebuffer->height, 10);
 
@@ -126,7 +126,7 @@ void kernMain(void) {
     // remove hhdm offset from things we need to use now that we are identity mapped
     kconsole_ptr = (BASIC_CONSOLE*)((uint64_t)kconsole_ptr - hhdm_response->offset);
     framebuffer = (struct limine_framebuffer*)((uint64_t)framebuffer - hhdm_response->offset);
-    font_data = &_binary_assets_fonts_zap_ext_light32_psf_start; */
+    font_data = &_binary_assets_fonts_zap_ext_vga16_psf_start; */
 
     bcon_init(kconsole_ptr, framebuffer, font_data); // reinit the console so that it uses the new values
 

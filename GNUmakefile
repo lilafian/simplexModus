@@ -13,7 +13,7 @@ NASMFLAGS := -F dwarf -g
 
 LDFLAGS :=
 
-FONT_FILE := assets/fonts/zap-ext-light32.psf
+FONT_FILE := assets/fonts/zap-ext-vga16.psf
 STARTUP_FILE := startup.nsh
 
 override CC_IS_CLANG := $(shell ! $(CC) -- version 2>/dev/null | grep 'clang' >/dev/null 2>&1; echo $$?)
@@ -62,7 +62,7 @@ override SRCFILES := $(shell cd src && find -L * -type f | LC_ALL=C sort)
 override CFILES := $(filter %.c,$(SRCFILES))
 override ASFILES := $(filter %.S,$(SRCFILES))
 override NASMFILES := $(filter %.asm,$(SRCFILES))
-override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o)) obj/zap_light.o
+override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o)) obj/zap_vga.o
 override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
 
 .PHONY: all
@@ -92,7 +92,7 @@ obj/%.asm.o: src/%.asm GNUmakefile
 	nasm $(NASMFLAGS) $< -o $@
 
 # Rule for creating the font object file
-obj/zap_light.o: $(FONT_FILE)
+obj/zap_vga.o: $(FONT_FILE)
 	mkdir -p "$$(dirname $@)"
 	objcopy -O elf64-x86-64 -B i386 -I binary $< $@
 
