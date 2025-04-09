@@ -117,16 +117,18 @@ void kernMain(void) {
         ptm_mapMemory(page_table_manager_ptr, (void*)i, (void*)i, hhdm_response->offset);
     }
 
-    uint64_t framebuffer_base = (uint64_t)framebuffer_request.response->framebuffers[0];
-    uint64_t framebuffer_size = ((uint64_t)framebuffer_request.response->framebuffers[0]->edid + (uint64_t)framebuffer_request.response->framebuffers[0]->edid_size) - framebuffer_base + 0x1000; // edid is last property of framebuffer response (revision 0), and also map an extra page;
+    void* page_map_lv4_physical = (void*)((uint64_t)page_map_lv4 - hhdm_response->offset);
 
-    for (uint64_t i = framebuffer_base; i < framebuffer_base + framebuffer_size; i += 4096) {
-        ptm_mapMemory(page_table_manager_ptr, (void*)i, (void*)i, hhdm_response->offset);
-    }
-
+    /* the following code is commented because it breaks! fix it very very soon pls
     // load map lv4 into cr3 so that map works correctly
-    asm("mov %0, %%cr3" : : "r" (page_map_lv4));
+    asm("mov %0, %%cr3" : : "r" (page_map_lv4_physical));
+    
+    // remove hhdm offset from things we need to use now that we are identity mapped
+    kconsole_ptr = (BASIC_CONSOLE*)((uint64_t)kconsole_ptr - hhdm_response->offset);
+    framebuffer = (struct limine_framebuffer*)((uint64_t)framebuffer - hhdm_response->offset);
+    font_data = &_binary_assets_fonts_zap_ext_light32_psf_start; */
 
+    bcon_init(kconsole_ptr, framebuffer, font_data); // reinit the console so that it uses the new values
 
     bcon_write(kconsole_ptr, "\033[32msimplexModus \033[36mv0\n", true);
     bcon_append(kconsole_ptr, "\033[37mframebuffer dimensions: ", true);

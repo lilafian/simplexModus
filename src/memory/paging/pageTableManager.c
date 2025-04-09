@@ -25,7 +25,7 @@ void ptm_mapMemory(PAGE_TABLE_MANAGER* page_table_manager, void* virtual_memory,
         page_directory_entry.read_write = true;
         page_table_manager->page_map_lv4->entries[indexer.pdp_index] = page_directory_entry;
     } else {
-        page_directory_pointer = (PAGE_TABLE*)((uint64_t)page_directory_entry.address << 12);
+        page_directory_pointer = (PAGE_TABLE*)(((uint64_t)page_directory_entry.address << 12) + hhdm_offset);
     }
 
     page_directory_entry = page_directory_pointer->entries[indexer.pd_index];
@@ -36,9 +36,9 @@ void ptm_mapMemory(PAGE_TABLE_MANAGER* page_table_manager, void* virtual_memory,
         page_directory_entry.address = ((uint64_t)page_directory - hhdm_offset) >> 12;
         page_directory_entry.present = true;
         page_directory_entry.read_write = true;
-        page_directory_pointer->entries[indexer.pdp_index] = page_directory_entry;
+        page_directory_pointer->entries[indexer.pd_index] = page_directory_entry;
     } else {
-        page_directory = (PAGE_TABLE*)((uint64_t)page_directory_entry.address << 12);
+        page_directory = (PAGE_TABLE*)(((uint64_t)page_directory_entry.address << 12) + hhdm_offset);
     }
 
     page_directory_entry = page_directory->entries[indexer.pt_index];
@@ -49,9 +49,9 @@ void ptm_mapMemory(PAGE_TABLE_MANAGER* page_table_manager, void* virtual_memory,
         page_directory_entry.address = ((uint64_t)page_table - hhdm_offset) >> 12;
         page_directory_entry.present = true;
         page_directory_entry.read_write = true;
-        page_directory->entries[indexer.pdp_index] = page_directory_entry;
+        page_directory->entries[indexer.pt_index] = page_directory_entry;
     } else {
-        page_table = (PAGE_TABLE*)((uint64_t)page_directory_entry.address << 12);
+        page_table = (PAGE_TABLE*)(((uint64_t)page_directory_entry.address << 12) + hhdm_offset);
     }
 
     page_directory_entry = page_table->entries[indexer.p_index];
