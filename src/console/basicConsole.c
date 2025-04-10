@@ -48,15 +48,18 @@ void bcon_display(BASIC_CONSOLE* console) {
 
     drawRect(0, 0, console->framebuffer->width, 16, console->framebuffer, 0xbbbbbb);
     drawString(0, 0, "simplexModus v0", 0x000000, console->display_font, console->framebuffer, false);
+    int nameX = console->framebuffer->width - smk_strlen(console->name) * 8;
+    drawString(nameX, 0, console->name, 0x000000, console->display_font, console->framebuffer, false);
 }
 
 
-void bcon_init(BASIC_CONSOLE* console, struct limine_framebuffer* framebuffer, void* display_font) {
+void bcon_init(BASIC_CONSOLE* console, struct limine_framebuffer* framebuffer, void* display_font, char* name) {
     console->framebuffer = framebuffer;
     console->display_font = display_font;
     console->cursorX = 0;
     console->cursorY = 0;
-    console->width = framebuffer->width / 16;
+    console->width = framebuffer->width / 8;
     console->height = framebuffer->height / 16 - 1;
     console->out_content[0] = '\0';
+    console->name = name;
 }

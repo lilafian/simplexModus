@@ -1,4 +1,5 @@
 #include "pageFrameAllocator.h"
+#include "../../panic/panic.h"
 
 uint64_t free_memory;
 uint64_t reserved_memory;
@@ -25,6 +26,10 @@ void pfa_readEfiMemoryMap(PAGE_FRAME_ALLOCATOR* allocator, uint64_t memory_map_e
         }
     }
 
+    if (largest_free_segment == NULL) {
+        kpanic(0xF0, "NO USABLE MEMORY IN MEMORY MAP");
+    }
+
     uint64_t memory_size = getMemorySize(memory_map_entry_count, memory_map_entries);
     total_memory = memory_size;
     free_memory = memory_size;
@@ -41,13 +46,16 @@ void pfa_readEfiMemoryMap(PAGE_FRAME_ALLOCATOR* allocator, uint64_t memory_map_e
         // 
         if ((memory_map_entries[i]->type != LIMINE_MEMMAP_USABLE && memory_map_entries[i]->type != LIMINE_MEMMAP_RESERVED) || memory_map_entries[i]->type == LIMINE_MEMMAP_KERNEL_AND_MODULES) { // reserved memory should be ignored as it is millions of pages (no idea why, it takes up more than available space), also just ensure that the kernel is reserved
             pfa_reservePages(allocator, (void*)memory_map_entries[i]->base, memory_map_entries[i]->length / 4096);
-        
         }
 
         
     }
     // reserve first page since limine doesnt like it
     pfa_reservePages(allocator, (void*)0, 1);
+
+    if (free_memory == 0) {
+        kpanic(0xF1, "OUT OF MEMORY");
+    }
 }
 
 void pfa_initBitmap(PAGE_FRAME_ALLOCATOR* allocator, size_t bitmap_size, void* buffer_address, uint64_t hhdm_offset) {

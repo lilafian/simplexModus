@@ -2,6 +2,7 @@
 #include "pageMapIndexer.h"
 #include "pageFrameAllocator.h"
 #include "../../cfuncs/cfuncs.h"
+#include "../../panic/panic.h"
 #include <stdint.h>
 
 void ptm_init(PAGE_TABLE_MANAGER* page_table_manager, PAGE_TABLE* page_map_lv4_address) {
@@ -9,6 +10,10 @@ void ptm_init(PAGE_TABLE_MANAGER* page_table_manager, PAGE_TABLE* page_map_lv4_a
 }
 
 void ptm_mapMemory(PAGE_TABLE_MANAGER* page_table_manager, void* virtual_memory, void* physical_memory, uint64_t hhdm_offset) {
+    if (page_table_manager->page_map_lv4 == NULL) {
+        kpanic(0xF2, "PAGE MAP LEVEL 4 IS NULL");
+    }
+
     PAGE_MAP_INDEXER indexer;
     PAGE_MAP_INDEXER* indexer_ptr = &indexer;
     pmi_init(indexer_ptr, (uint64_t)virtual_memory);
