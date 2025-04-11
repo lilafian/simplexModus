@@ -8,13 +8,20 @@ All changes are done through standard GitHub pull requests. Ensure your code ful
 * Follows all naming conventions
 
 # Naming conventions
-| Type          | Convention        |
-|---------------|-------------------|
-| Files         | `camelCase`       |
-| Directories   | `camelCase`       |
-| Identifiers   | `snake_case`      |
-| Functions     | `snake_case`      |
-| Constants     | `CAPS_SNAKE_CASE` |
+| Type             | Convention            |
+|------------------|-----------------------|
+| Files            | `camelCase`           |
+| Directories      | `camelCase`           |
+| Identifiers      | `snake_case`          |
+| Functions        | `snake_case`          |
+| Struct functions | `struct_functionName` |
+| Constants        | `CAPS_SNAKE_CASE`     |
+
+The star operator in a pointer goes **BEFORE** the space between the type and identifier. For example,
+```c
+int* my_pointer; // correct
+int *my_pointer; // incorrect
+```
 
 # License declaration
 The simplexModus standard license declaration has the path of the file (relative to simplexModus/), all modification years, author, the path of the LICENSE file, and a short description of the file. \
