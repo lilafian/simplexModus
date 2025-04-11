@@ -1,7 +1,14 @@
+# simplexModus compilation, linking, and building rules.
+# 
+# 	!!!! This makefile is for GNU make on Linux. If you are using another operating system, edit the programs below. !!!!
+#
+# If you are here to change the OVMF paths, use Ctrl+F, grep, or a similar tool for "OVMF" in this file.
+
 MAKEFLAGS += -rR
 .SUFFIXES:
 
-override KERNELOUTPUTFILENAME := spxMdsKernel
+override KERNELOUTPUTFILENAME := smkernel
+override USERSPACEOUTPUTFILENAME := smuexp
 
 CC := cc
 
@@ -14,7 +21,6 @@ NASMFLAGS := -F dwarf -g
 LDFLAGS :=
 
 FONT_FILE := assets/fonts/zap-ext-vga16.psf
-STARTUP_FILE := startup.nsh
 
 override CC_IS_CLANG := $(shell ! $(CC) -- version 2>/dev/null | grep 'clang' >/dev/null 2>&1; echo $$?)
 
@@ -23,7 +29,6 @@ ifeq ($(CC_IS_CLANG),1)
 		-target x86_64-unknown-none
 endif
 
-# dont change!
 override CFLAGS += \
     -Wall \
     -Wextra \
@@ -41,12 +46,10 @@ override CFLAGS += \
     -mno-red-zone \
     -mcmodel=kernel
 
-# dont change!
 override NASMFLAGS += \
     -Wall \
     -f elf64
 
-# dont change!
 override LDFLAGS += \
     -Wl,-m,elf_x86_64 \
     -Wl,--build-id=none \
@@ -58,40 +61,60 @@ override LDFLAGS += \
 # Use "find" to glob all *.c, *.S, and *.asm files in the tree and obtain the
 # object and header dependency file names.
 #  - osdev wiki
-override SRCFILES := $(shell cd src && find -L * -type f | LC_ALL=C sort)
-override CFILES := $(filter %.c,$(SRCFILES))
-override ASFILES := $(filter %.S,$(SRCFILES))
-override NASMFILES := $(filter %.asm,$(SRCFILES))
-override OBJ := $(addprefix obj/,$(CFILES:.c=.c.o) $(ASFILES:.S=.S.o) $(NASMFILES:.asm=.asm.o)) obj/zap_vga.o
-override HEADER_DEPS := $(addprefix obj/,$(CFILES:.c=.c.d) $(ASFILES:.S=.S.d))
+override KSRCFILES := $(shell cd src/kernel && find -L . -type f | LC_ALL=C sort)
+override KCFILES := $(filter %.c,$(KSRCFILES))
+override KASFILES := $(filter %.S,$(KSRCFILES))
+override KNASMFILES := $(filter %.asm,$(KSRCFILES))
+override KOBJ := $(addprefix obj/kernel/,$(KCFILES:.c=.c.o) $(KASFILES:.S=.S.o) $(KNASMFILES:.asm=.asm.o)) obj/zap_vga.o
+override KHEADER_DEPS := $(addprefix obj/kernel/,$(KCFILES:.c=.c.d) $(KASFILES:.S=.S.d))
 
-.PHONY: all
-all: bin/$(KERNELOUTPUTFILENAME)
+override USRCFILES := $(shell cd src/user && find -L . -type f | LC_ALL=C sort)
+override UCFILES := $(filter %.c,$(USRCFILES))
+override UASFILES := $(filter %.S,$(USRCFILES))
+override UNASMFILES := $(filter %.asm,$(USRCFILES))
+override UOBJ := $(addprefix obj/user/,$(UCFILES:.c=.c.o) $(UASFILES:.S=.S.o) $(UNASMFILES:.asm=.asm.o))
+override UHEADER_DEPS := $(addprefix obj/user/,$(UCFILES:.c=.c.d) $(UASFILES:.S=.S.d))
 
--include $(HEADER_DEPS)
 
-# Link rules for the final executable.
-bin/$(KERNELOUTPUTFILENAME): GNUmakefile linker.ld $(OBJ)
+.PHONY: kernel
+kernel: bin/$(KERNELOUTPUTFILENAME)
+
+-include $(KHEADER_DEPS)
+
+# link rules for the kernel
+bin/$(KERNELOUTPUTFILENAME): GNUmakefile linker.ld $(KOBJ)
 
 	mkdir -p "$$(dirname $@)"
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJ) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(KOBJ) -o $@
 
-# Compilation rules for *.c files.
+.PHONY: userexp
+userexp: bin/$(USERSPACEOUTPUTFILENAME)
+
+-include $(UHEADER_DEPS)
+
+# link rules for the userspace
+bin/$(USERSPACEOUTPUTFILENAME): GNUmakefile linker.ld $(UOBJ)
+
+	mkdir -p "$$(dirname $@)"
+	$(CC) $(CFLAGS) $(LDFLAGS) $(UOBJ) -o $@
+
+
+# compilation rules for C files
 obj/%.c.o: src/%.c GNUmakefile
 	mkdir -p "$$(dirname $@)"
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-# Compilation rules for *.S files.
+# compilation rules for assembly .S files
 obj/%.S.o: src/%.S GNUmakefile
 	mkdir -p "$$(dirname $@)"
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-# Compilation rules for *.asm (nasm) files.
+# compilation rules for assembly .asm files
 obj/%.asm.o: src/%.asm GNUmakefile
 	mkdir -p "$$(dirname $@)"
 	nasm $(NASMFLAGS) $< -o $@
 
-# Rule for creating the font object file
+# rule for creating the default font binary
 obj/zap_vga.o: $(FONT_FILE)
 	mkdir -p "$$(dirname $@)"
 	objcopy -O elf64-x86-64 -B i386 -I binary $< $@
@@ -112,7 +135,9 @@ build:
 
 	# Copy the relevant files over.
 	mkdir -p iso_root/boot
-	cp -v bin/spxMdsKernel iso_root/boot/
+	mkdir -p iso_root/system
+	cp -v bin/smkernel iso_root/system
+	cp -v bin/smuexp iso_root/system
 	mkdir -p iso_root/boot/limine
 	cp -v limine.conf limine/limine-bios.sys limine/limine-bios-cd.bin \
 	      limine/limine-uefi-cd.bin iso_root/boot/limine/
@@ -132,11 +157,28 @@ build:
 	# Install Limine stage 1 and 2 for legacy BIOS boot.
 	./limine/limine bios-install simplexModus.iso
 
+.PHONY: checklicense
+checklicense:
+	@files=$$(find ./src -type f \( -name "*.c" -o -name "*.h" \) ! -path "./src/kernel/boot/limine.h"); \
+	missing=0; \
+	for file in $$files; do \
+		if ! awk 'NR <= 10 { block = block $$0 "\n" } END { \
+			if (block !~ /\/\*\n \* simplexModus\/.*\n \* copyright \(c\) [0-9]{4} .*, MIT license\.\n \* view more license information by viewing simplexModus\/LICENSE\.\n \*\n \* .*\n \*\//) \
+				exit 1; \
+		}' "$$file"; then \
+			echo "Missing or invalid license declaration at $$file"; \
+			missing=1; \
+		fi; \
+	done; \
+	if [ $$missing -eq 0 ]; then \
+		echo "All files in src contain a valid license declaration!"; \
+	fi
+
 .PHONY: run
 run:
-	@echo "!=============================================================!"
-	@echo "If your password is prompted, it is for booting OVMF with sudo!"
-	@echo "!=============================================================!"
+	@echo "!================================================================!"
+	@echo "! If your password is prompted, it is for booting OVMF with sudo !"
+	@echo "!================================================================!"
 	sudo qemu-system-x86_64 \
 		-machine pc \
 		-enable-kvm \
@@ -148,16 +190,18 @@ run:
 
 .PHONY: rundbg
 rundbg:
-	@echo "!=============================================================!"
-	@echo "If your password is prompted, it is for booting OVMF with sudo!"
-	@echo "!=============================================================!"
+	@echo "!==========================================================================!"
+	@echo "!      If your password is prompted, it is for booting OVMF with sudo      !"
+	@echo "!==========================================================================!"
+	@echo "! You are running simplexModus in DEBUG MODE! Use GDB to debug the kernel. !"
+	@echo "!==========================================================================!"
 	sudo qemu-system-x86_64 \
 		-s -S \
 		-machine pc \
 		-enable-kvm \
 		-drive file=simplexModus.iso,media=cdrom,if=none,id=spxmds \
 		-m 256M \
-		-drive if=pflash,format=raw,readonly=on,file=/usr/share/ovmf/x64/OVMF_CODE.4m.fd \
+		-drive if=pflash,format=raw,readonly=on,file=/usr/share/ovmf/x64/OVMF_CODE.4m.fd \ 
 		-drive if=pflash,format=raw,file=/usr/share/ovmf/x64/OVMF_VARS.4m.fd \
 		-device ide-cd,drive=spxmds,bootindex=0
 
