@@ -1,5 +1,5 @@
 /*
- * simplexModus/src/common/cfuncs.h
+ * simplexModus/src/kernel/common/cfuncs.h
  * copyright (c) 2025 lilaf, MIT license.
  * view more license information by viewing simplexModus/LICENSE.
  *

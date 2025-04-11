@@ -1,5 +1,5 @@
 /*
- * simplexModus/src/console/basicConsole/basicConsole.h
+ * simplexModus/src/kernel/console/basicConsole/basicConsole.h
  * copyright (c) 2025 lilaf, MIT license.
  * view more license information by viewing simplexModus/LICENSE.
  *
