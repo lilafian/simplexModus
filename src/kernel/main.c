@@ -16,9 +16,7 @@
 #include "memory/memory.h"
 #include "memory/bitmap/bitmap.h"
 #include "memory/paging/pageFrameAllocator.h"
-#include "memory/paging/pageMapIndexer.h"
 #include "memory/paging/paging.h"
-#include "memory/paging/pageTableManager.h"
 #include "panic/panic.h"
 
 // limine requests
@@ -129,40 +127,6 @@ void kernel_main(void) {
     bcon_append(kconsole_ptr, "reserved memory: \033[36m", true);
     bcon_append(kconsole_ptr, itoa64(pfa_getReservedMemory() / 1024, 10), true);
     bcon_append(kconsole_ptr, " KiB\033[37m\n", true);
-
-    bcon_append(kconsole_ptr, "locking one page for the page map level 4\n", true);
-    PAGE_TABLE* page_map_lv4 = (PAGE_TABLE*)((uint64_t)pfa_requestPage(allocator_ptr) + hhdm_response->offset);
-    memset(page_map_lv4, 0, 0x1000);
-    bcon_append(kconsole_ptr, "locked pml4 page!\n", true);
-
-    bcon_append(kconsole_ptr, "creating page table manager\n", true);
-    PAGE_TABLE_MANAGER page_table_manager;
-    PAGE_TABLE_MANAGER* page_table_manager_ptr = &page_table_manager;
-    ptm_init(page_table_manager_ptr, page_map_lv4);
-    bcon_append(kconsole_ptr, "page table manager created!\n", true);
-
-    bcon_append(kconsole_ptr, "identity mapping all memory\n", true);
-    for (uint64_t i = 0; i < getMemorySize(memmap_response->entry_count, memmap_response->entries); i += 0x1000) {
-        ptm_mapMemory(page_table_manager_ptr, (void*)i, (void*)i, hhdm_response->offset);
-    }
-    bcon_append(kconsole_ptr, "all memory identity mapped!\n", true);
-
-    void* page_map_lv4_physical = (void*)((uint64_t)page_map_lv4 - hhdm_response->offset);
-
-    /* 
-       the following code is commented because it breaks! fix it very very soon pls
-
-
-    // load map lv4 into cr3 so that map works correctly
-    asm("mov %0, %%cr3" : : "r" (page_map_lv4_physical)); // breaks here
-    
-    // remove hhdm offset from things we need to use now that we are identity mapped
-    kconsole_ptr = (BASIC_CONSOLE*)((uint64_t)kconsole_ptr - hhdm_response->offset);
-    framebuffer = (struct limine_framebuffer*)((uint64_t)framebuffer - hhdm_response->offset);
-    font_data = &_binary_assets_fonts_zap_ext_vga16_psf_start;
-
-    bcon_init(kconsole_ptr, framebuffer, font_data); // reinit the console so that it uses the new values
-    */
 
     // done, hang
     halt();
