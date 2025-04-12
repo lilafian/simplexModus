@@ -1,6 +1,6 @@
 # simplexModus standard panic codes
 ### Panic types
-The following types are provided as macros in `src/panic/panic.h` with `_MIN` and `_MAX` variants. Use these macros as offsets, do not hard-code panic codes.
+The following types are provided as constants in `src/kernel/panic/panic.h` with `_MIN` and `_MAX` variants. Use these macros as offsets, do not hard-code panic codes.
 | Code range          | Type name/macro              | Available codes |
 |---------------------|------------------------------|-----------------|
 | `0x01`-`0xEF`       | PANIC_KERNEL_INIT            | 239             |
