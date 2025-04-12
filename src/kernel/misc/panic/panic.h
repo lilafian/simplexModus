@@ -1,5 +1,5 @@
 /*
- * simplexModus/src/panic/panic.h
+ * simplexModus/src/kernel/misc/panic/panic.h
  * copyright (c) 2025 lilaf, MIT license.
  * view more license information by viewing simplexModus/LICENSE.
  *
@@ -9,7 +9,7 @@
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
-#include "../boot/limine.h"
+#include "../../boot/limine.h"
 
 #define PANIC_KERNEL_INIT_MIN 0x01
 #define PANIC_KERNEL_INIT_MAX 0xEF

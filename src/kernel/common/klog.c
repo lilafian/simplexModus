@@ -57,6 +57,11 @@ void klogf(char* fmt, ...) {
                     smk_concat(buffer, itoa64(value, 16));
                     break;
                 }
+                case 'p': {
+                    void* value = va_arg(args, void*);
+                    smk_concat(buffer, itoa64((uint64_t)value, 16));
+                    break;
+                }
                 case '%': {
                     smk_concat(buffer, "%");
                     break;

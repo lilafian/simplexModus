@@ -1,5 +1,5 @@
 /*
- * simplexModus/src/panic/panic.c
+ * simplexModus/src/kernel/misc/panic/panic.c
  * copyright (c) 2025 lilaf, MIT license.
  * view more license information by viewing simplexModus/LICENSE.
  *
@@ -7,8 +7,8 @@
  */
 
 #include "panic.h"
-#include "../console/basicConsole/basicConsole.h"
-#include "../common/cfuncs.h"
+#include "../../console/basicConsole/basicConsole.h"
+#include "../../common/cfuncs.h"
 
 PANIC_INFORMATION global_panic_information;
 

@@ -17,7 +17,7 @@
 #include "memory/bitmap/bitmap.h"
 #include "memory/paging/pageFrameAllocator.h"
 #include "memory/paging/paging.h"
-#include "panic/panic.h"
+#include "misc/panic/panic.h"
 #include "common/klog.h"
 
 // limine requests
@@ -102,7 +102,8 @@ void kernel_main(void) {
     PAGE_FRAME_ALLOCATOR allocator;
     PAGE_FRAME_ALLOCATOR* allocator_ptr = &allocator;
     global_allocator = allocator_ptr;
-    pfa_readEfiMemoryMap(allocator_ptr, memmap_response->entry_count, memmap_response->entries, hhdm_response->offset);
+    hhdm_offset = hhdm_response->offset;
+    pfa_readEfiMemoryMap(allocator_ptr, memmap_response->entry_count, memmap_response->entries);
     klog("created global page frame allocator!\n");
 
     // DO NOT CALL ANY FUNCTIONS THAT USE THE GLOBAL ALLOCATOR ABOVE THIS LINE! THE KERNEL WILL CRASH!

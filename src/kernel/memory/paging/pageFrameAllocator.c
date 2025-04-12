@@ -7,21 +7,28 @@
  */
 
 #include "pageFrameAllocator.h"
-#include "../../panic/panic.h"
+#include "../../misc/panic/panic.h"
+#include "../../common/klog.h"
 
 uint64_t free_memory;
 uint64_t reserved_memory;
 uint64_t used_memory;
 uint64_t total_memory;
+extern uint64_t hhdm_offset = 0;
 
 bool initialized = false;
 PAGE_FRAME_ALLOCATOR* global_allocator;
 
-void pfa_readEfiMemoryMap(PAGE_FRAME_ALLOCATOR* allocator, uint64_t memory_map_entry_count, struct limine_memmap_entry** memory_map_entries, uint64_t hhdm_offset) {
+void pfa_readEfiMemoryMap(PAGE_FRAME_ALLOCATOR* allocator, uint64_t memory_map_entry_count, struct limine_memmap_entry** memory_map_entries) {
     if (initialized) return;
 
-    initialized = true;
+    if (hhdm_offset == NULL) {
+        klog("\033[31mcould not read memory map, hhdm_offset is null.\033[37m\n");
+        return;
+    }
 
+    initialized = true;
+    
     void* largest_free_segment = NULL;
     size_t largest_free_segment_size = 0;
 
@@ -46,7 +53,7 @@ void pfa_readEfiMemoryMap(PAGE_FRAME_ALLOCATOR* allocator, uint64_t memory_map_e
 
     uint64_t bitmap_size = memory_size / 4096 / 8 + 1;
 
-    pfa_initBitmap(allocator, bitmap_size, largest_free_segment, hhdm_offset);
+    pfa_initBitmap(allocator, bitmap_size, largest_free_segment);
     void* bitmap_physical_address = (void*)((uint64_t)&allocator->page_bitmap.buffer - hhdm_offset);
     pfa_lockPages(allocator, bitmap_physical_address, allocator->page_bitmap.size / 4096 + 1);
 
@@ -66,7 +73,7 @@ void pfa_readEfiMemoryMap(PAGE_FRAME_ALLOCATOR* allocator, uint64_t memory_map_e
     }
 }
 
-void pfa_initBitmap(PAGE_FRAME_ALLOCATOR* allocator, size_t bitmap_size, void* buffer_address, uint64_t hhdm_offset) {
+void pfa_initBitmap(PAGE_FRAME_ALLOCATOR* allocator, size_t bitmap_size, void* buffer_address) {
     allocator->page_bitmap.size = bitmap_size;
     allocator->page_bitmap.buffer = (uint8_t*)((uint64_t)buffer_address + hhdm_offset);
 
@@ -141,7 +148,7 @@ void* pfa_requestPage(PAGE_FRAME_ALLOCATOR* allocator) {
     for (uint64_t i = 0; i < allocator->page_bitmap.size * 8; i++) {
         if (bitmap_get(&allocator->page_bitmap, i) == true) continue;
         pfa_lockPage(allocator, (void*)(i * 4096));
-        return (void*)(i * 4096);
+        return (void*)(i * 4096 + hhdm_offset);
     }
 
     // add swapfile implementation here
