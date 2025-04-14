@@ -1,6 +1,6 @@
 /*
  * simplexModus/src/kernel/graphics/psfFonts.c
- * copyright (c) 2025 lilaf, MIT license.
+ * copyright (c) 2025 lilaf, GNU General Public License v3.0.
  * view more license information by viewing simplexModus/LICENSE.
  *
  * framebuffer pc screen font renderer function implementations

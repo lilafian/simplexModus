@@ -1,6 +1,6 @@
 /*
  * simplexModus/src/memory/memory.h
- * copyright (c) 2025 lilaf, MIT license.
+ * copyright (c) 2025 lilaf, GNU General Public License v3.0.
  * view more license information by viewing simplexModus/LICENSE.
  *
  * common memory function declarations

@@ -127,35 +127,21 @@ clean:
 # Build ISO image
 .PHONY: build
 build:
-	# Build "limine" utility.
-	make -C limine
+	rm -f simplexModus.img
+	dd if=/dev/zero of=simplexModus.img bs=512 count=93750
+	mkfs.fat -F 32 simplexModus.img
 
-	# Create a directory which will be our ISO root.
-	mkdir -p iso_root
+	mmd -i simplexModus.img ::/EFI
+	mmd -i simplexModus.img ::/EFI/BOOT
+	mmd -i simplexModus.img ::/system
+	mmd -i simplexModus.img ::/boot
+	mmd -i simplexModus.img ::/boot/limine
 
-	# Copy the relevant files over.
-	mkdir -p iso_root/boot
-	mkdir -p iso_root/system
-	cp -v bin/smkernel iso_root/system
-	cp -v bin/smuexp iso_root/system
-	mkdir -p iso_root/boot/limine
-	cp -v limine.conf limine/limine-bios.sys limine/limine-bios-cd.bin \
-	      limine/limine-uefi-cd.bin iso_root/boot/limine/
-
-	# Create the EFI boot tree and copy Limine's EFI executables over.
-	mkdir -p iso_root/EFI/BOOT
-	cp -v limine/BOOTX64.EFI iso_root/EFI/BOOT/
-	cp -v limine/BOOTIA32.EFI iso_root/EFI/BOOT/
-
-	# Create the bootable ISO.
-	xorriso -as mkisofs -R -r -J -b boot/limine/limine-bios-cd.bin \
-	        -no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus \
-	        -apm-block-size 2048 --efi-boot boot/limine/limine-uefi-cd.bin \
-	        -efi-boot-part --efi-boot-image --protective-msdos-label \
-	        iso_root -o simplexModus.iso
-
-	# Install Limine stage 1 and 2 for legacy BIOS boot.
-	./limine/limine bios-install simplexModus.iso
+	mcopy -i simplexModus.img limine/BOOTX64.EFI ::/EFI/BOOT
+	mcopy -i simplexModus.img bin/smkernel ::/system
+	mcopy -i simplexModus.img bin/smuexp ::/system
+	mcopy -i simplexModus.img limine.conf ::/boot/limine
+	mcopy -i simplexModus.img startup.nsh ::
 
 .PHONY: checklicense
 checklicense:
@@ -182,11 +168,10 @@ run:
 	sudo qemu-system-x86_64 \
 		-machine pc \
 		-enable-kvm \
-		-drive file=simplexModus.iso,media=cdrom,if=none,id=spxmds \
+		-drive file=simplexModus.img \
 		-m 256M \
 		-drive if=pflash,format=raw,readonly=on,file=/usr/share/ovmf/x64/OVMF_CODE.4m.fd \
 		-drive if=pflash,format=raw,file=/usr/share/ovmf/x64/OVMF_VARS.4m.fd \
-		-device ide-cd,drive=spxmds,bootindex=0
 
 .PHONY: rundbg
 rundbg:
@@ -199,9 +184,8 @@ rundbg:
 		-s -S \
 		-machine pc \
 		-enable-kvm \
-		-drive file=simplexModus.iso,media=cdrom,if=none,id=spxmds \
+		-drive file=simplexModus.img \
 		-m 256M \
-		-drive if=pflash,format=raw,readonly=on,file=/usr/share/ovmf/x64/OVMF_CODE.4m.fd \ 
+		-drive if=pflash,format=raw,readonly=on,file=/usr/share/ovmf/x64/OVMF_CODE.4m.fd \
 		-drive if=pflash,format=raw,file=/usr/share/ovmf/x64/OVMF_VARS.4m.fd \
-		-device ide-cd,drive=spxmds,bootindex=0
 
