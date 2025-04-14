@@ -149,7 +149,7 @@ checklicense:
 	missing=0; \
 	for file in $$files; do \
 		if ! awk 'NR <= 10 { block = block $$0 "\n" } END { \
-			if (block !~ /\/\*\n \* simplexModus\/.*\n \* copyright \(c\) [0-9]{4} .*, MIT license\.\n \* view more license information by viewing simplexModus\/LICENSE\.\n \*\n \* .*\n \*\//) \
+			if (block !~ /\/\*\n \* simplexModus\/.*\n \* copyright \(c\) [0-9]{4} .*, GNU General Public License v3.0\.\n \* view more license information by viewing simplexModus\/LICENSE\.\n \*\n \* .*\n \*\//) \
 				exit 1; \
 		}' "$$file"; then \
 			echo "Missing or invalid license declaration at $$file"; \
