@@ -47,6 +47,11 @@ void klogf(char* fmt, ...) {
                     smk_concat(buffer, string);
                     break;
                 }
+                case 'c': { // character
+                    char character = va_arg(args, char);
+                    smk_concat_char(buffer, character);
+                    break;
+                }
                 case 'd': { // decimal uint
                     uint64_t value = va_arg(args, uint64_t);
                     smk_concat(buffer, itoa64(value, 10));

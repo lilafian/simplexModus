@@ -6,3 +6,7 @@ there are two modes, **core** and **safe**. core mode operates in ring 0 and req
 
 see `LICENSE` for license information \
 see `docs` for documentation, including contribution guidelines and a build guide
+
+> ![NOTE]
+> simplexModus will **NOT** boot on BIOS systems. simplexModus is designed for x86 64-bit UEFI systems.
+> This means that it will boot on most modern systems, but not on systems from ~2006 or before.

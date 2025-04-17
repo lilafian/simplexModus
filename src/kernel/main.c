@@ -42,6 +42,12 @@ static volatile struct limine_hhdm_request hhdm_request = {
     .revision = 0
 };
 
+__attribute__((used, section(".limine_requests")))
+static volatile struct limine_rsdp_request rsdp_request = {
+    .id = LIMINE_RSDP_REQUEST,
+    .revision = 0
+};
+
 __attribute__((used, section(".limine_requests_start")))
 static volatile LIMINE_REQUESTS_START_MARKER;
 
@@ -106,6 +112,8 @@ void kernel_main(void) {
     pfa_readEfiMemoryMap(allocator_ptr, memmap_response->entry_count, memmap_response->entries);
     klog("created global page frame allocator!\n");
 
+    const struct limine_rsdp_response* rsdp_response = rsdp_request.response;
+
     // DO NOT CALL ANY FUNCTIONS THAT USE THE GLOBAL ALLOCATOR ABOVE THIS LINE! THE KERNEL WILL CRASH!
     // below here is safe :)
     
@@ -113,6 +121,9 @@ void kernel_main(void) {
     klogf("free memory: \033[36m%d KiB\033[37m\n", pfa_getFreeMemory() / 1024);
     klogf("used memory: \033[36m%d KiB\033[37m\n", pfa_getUsedMemory() / 1024);
     klogf("reserved memory: \033[36m%d KiB\033[37m\n", pfa_getReservedMemory() / 1024);
+
+    klogf("rsdp address: 0x%p\n", rsdp_response->address);
+    klog("todo: fix page map, make sure to map the hhdm kernel mapping to the same address, but i can still map everything else pa=va");
 
     // done, hang
     halt();

@@ -168,7 +168,9 @@ run:
 	sudo qemu-system-x86_64 \
 		-machine pc \
 		-enable-kvm \
-		-drive file=simplexModus.img \
+		-drive id=disk,file=simplexModus.img,if=none \
+		-device ahci,id=ahci \
+		-device ide-hd,drive=disk,bus=ahci.0,bootindex=0 \
 		-m 256M \
 		-drive if=pflash,format=raw,readonly=on,file=/usr/share/ovmf/x64/OVMF_CODE.4m.fd \
 		-drive if=pflash,format=raw,file=/usr/share/ovmf/x64/OVMF_VARS.4m.fd \
@@ -184,7 +186,9 @@ rundbg:
 		-s -S \
 		-machine pc \
 		-enable-kvm \
-		-drive file=simplexModus.img \
+		-drive id=disk,file=simplexModus.img,if=none \
+		-device ahci,id=ahci \
+		-device ide-hd,drive=disk,bus=ahci.0,bootindex=0 \
 		-m 256M \
 		-drive if=pflash,format=raw,readonly=on,file=/usr/share/ovmf/x64/OVMF_CODE.4m.fd \
 		-drive if=pflash,format=raw,file=/usr/share/ovmf/x64/OVMF_VARS.4m.fd \

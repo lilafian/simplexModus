@@ -30,6 +30,7 @@ char* itoa64(uint64_t val, int base);
 
 int smk_strlen(const char* text);
 void smk_concat(char* dest, const char* src);
+void smk_concat_char(char* dest, const char src);
 bool smk_isdigit(char character);
 int smk_occurrences(char string[], char character);
 char** smk_strtok(const char* string, char delimiter);
