@@ -1,3 +1,11 @@
+/*
+ * simplexModus/src/kernel/fs/fat32/fat32.h
+ * copyright (c) 2025 lilaf, GNU General Public License v3.0.
+ * view more license information by viewing simplexModus/LICENSE.
+ *
+ * fat32 struct definitions
+ */
+
 #pragma once
 
 #include <stdint.h>

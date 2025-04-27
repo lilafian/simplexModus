@@ -1,5 +1,5 @@
 /*
- * simplexModus/src/memory/memory.c
+ * simplexModus/src/kernel/memory/memory.c
  * copyright (c) 2025 lilaf, GNU General Public License v3.0.
  * view more license information by viewing simplexModus/LICENSE.
  *
